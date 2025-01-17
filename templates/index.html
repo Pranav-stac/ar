@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AR Advertisement Platform</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #2d3748;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            width: 100%;
+            padding: 25px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            margin: 0;
+            color: white;
+            font-size: 2.5em;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .content {
+            max-width: 800px;
+            width: 90%;
+            margin: 40px auto;
+            text-align: center;
+        }
+        .ad-section {
+            background-color: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+        .upload-form {
+            margin: 25px 0;
+            padding: 30px;
+            border: 2px dashed #6366f1;
+            border-radius: 15px;
+            background-color: #f8fafc;
+            transition: all 0.3s ease;
+        }
+        .upload-form:hover {
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        .file-input-container {
+            margin: 20px 0;
+        }
+        .file-input-container input[type="file"] {
+            display: none;
+        }
+        .file-input-label {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+        }
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(99, 102, 241, 0.3);
+        }
+        .button {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(99, 102, 241, 0.3);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        .feature-card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .feature-card h3 {
+            color: #4f46e5;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .feature-card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        #selected-file-name {
+            margin-top: 12px;
+            color: #4f46e5;
+            font-weight: 500;
+        }
+        .emoji-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script>
+        function updateFileName() {
+            const input = document.getElementById('file-input');
+            const label = document.getElementById('selected-file-name');
+            if (input.files.length > 0) {
+                label.textContent = '📁 Selected: ' + input.files[0].name;
+            } else {
+                label.textContent = '';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>AR Advertisement Platform</h1>
+    </div>
+    
+    <div class="content">
+        <div class="ad-section">
+            <h2>Create Your AR Advertisement</h2>
+            <p>Transform your content into an immersive AR experience</p>
+            
+            <div class="upload-form">
+                <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                    <div class="file-input-container">
+                        <label for="file-input" class="file-input-label">Choose File</label>
+                        <input id="file-input" type="file" name="file" accept="image/*,video/*" required onchange="updateFileName()">
+                        <div id="selected-file-name"></div>
+                    </div>
+                    <button type="submit" class="button">Create Advertisement</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="emoji-icon">📤</div>
+                <h3>Easy Upload</h3>
+                <p>Simply upload your image or video content in seconds</p>
+            </div>
+            <div class="feature-card">
+                <div class="emoji-icon">📱</div>
+                <h3>Instant QR</h3>
+                <p>Get your AR QR code ready to share immediately</p>
+            </div>
+            <div class="feature-card">
+                <div class="emoji-icon">✨</div>
+                <h3>AR Ready</h3>
+                <p>Watch your content come to life in augmented reality</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

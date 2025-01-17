@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AR View</title>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        .back-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 999;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: black;
+        }
+    </style>
+    <script>
+        // Custom component for realistic fireworks
+        AFRAME.registerComponent('firework', {
+            init: function() {
+                this.createFirework();
+                // Create new fireworks more frequently
+                setInterval(() => this.createFirework(), 1000);
+            },
+            createFirework: function() {
+                const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF44FF', '#FFFFFF'];
+                const particles = 30; // More particles
+                
+                // Create explosion center
+                const startY = Math.random() * 1 + 1; // Higher starting point
+                
+                // Launch animation
+                const launch = document.createElement('a-sphere');
+                launch.setAttribute('radius', '0.02'); // Bigger launch particle
+                launch.setAttribute('color', colors[Math.floor(Math.random() * colors.length)]);
+                launch.setAttribute('position', {x: 0, y: 0, z: 0});
+                launch.setAttribute('material', {
+                    shader: 'standard',
+                    emissive: colors[Math.floor(Math.random() * colors.length)],
+                    emissiveIntensity: 3
+                });
+                
+                const launchAnim = document.createElement('a-animation');
+                launchAnim.setAttribute('attribute', 'position');
+                launchAnim.setAttribute('dur', '800');
+                launchAnim.setAttribute('to', `0 ${startY} 0`);
+                launchAnim.setAttribute('easing', 'ease-out');
+                
+                launch.appendChild(launchAnim);
+                this.el.appendChild(launch);
+                
+                // Remove launch trail after animation
+                setTimeout(() => this.el.removeChild(launch), 800);
+                
+                // Create explosion particles
+                setTimeout(() => {
+                    const explosionColor = colors[Math.floor(Math.random() * colors.length)];
+                    for (let i = 0; i < particles; i++) {
+                        const particle = document.createElement('a-sphere');
+                        const phi = Math.random() * Math.PI * 2;
+                        const theta = Math.random() * Math.PI;
+                        const r = 0.5 + Math.random() * 0.3; // Bigger explosion radius
+                        
+                        particle.setAttribute('radius', '0.01'); // Bigger particles
+                        particle.setAttribute('color', explosionColor);
+                        particle.setAttribute('position', {x: 0, y: startY, z: 0});
+                        
+                        // Create trail effect
+                        particle.setAttribute('material', {
+                            shader: 'standard',
+                            emissive: explosionColor,
+                            emissiveIntensity: 5 // More glow
+                        });
+                        
+                        // Explosion animation
+                        const posAnim = document.createElement('a-animation');
+                        posAnim.setAttribute('attribute', 'position');
+                        posAnim.setAttribute('dur', '1500'); // Longer duration
+                        posAnim.setAttribute('to', `${r * Math.sin(theta) * Math.cos(phi)} ${startY + r * Math.cos(theta)} ${r * Math.sin(theta) * Math.sin(phi)}`);
+                        posAnim.setAttribute('easing', 'ease-out');
+                        
+                        // Fade animation
+                        const fadeAnim = document.createElement('a-animation');
+                        fadeAnim.setAttribute('attribute', 'material.opacity');
+                        fadeAnim.setAttribute('dur', '1500');
+                        fadeAnim.setAttribute('from', '1');
+                        fadeAnim.setAttribute('to', '0');
+                        fadeAnim.setAttribute('easing', 'ease-in');
+                        
+                        particle.appendChild(posAnim);
+                        particle.appendChild(fadeAnim);
+                        this.el.appendChild(particle);
+                        
+                        // Remove particle after animation
+                        setTimeout(() => this.el.removeChild(particle), 1500);
+                    }
+                }, 800);
+            }
+        });
+
+        // Component to maintain aspect ratio
+        AFRAME.registerComponent('auto-scale', {
+            init: function() {
+                const el = this.el;
+                const img = new Image();
+                img.onload = function() {
+                    const width = this.width;
+                    const height = this.height;
+                    const ratio = width / height;
+                    if (ratio > 1) {
+                        // Landscape
+                        el.setAttribute('scale', `${ratio} 1 1`);
+                    } else {
+                        // Portrait
+                        el.setAttribute('scale', `1 ${1/ratio} 1`);
+                    }
+                };
+                img.src = el.getAttribute('src');
+            }
+        });
+    </script>
+</head>
+<body>
+    <a href="{{ url_for('index') }}" class="back-button">← Back to Upload</a>
+    
+    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
+        <a-marker preset="pattern" type="pattern" url="{{ url_for('static', filename='ok.patt') }}">
+            <!-- Main content (uploaded image/video) -->
+            {% if media_file %}
+                {% if media_file.lower().endswith(('.mp4', '.webm')) %}
+                    <a-video
+                        src="{{ url_for('static', filename='uploads/' + media_file) }}"
+                        position="0 0.1 0"
+                        rotation="-90 0 0"
+                        width="1"
+                        height="1"
+                        play="true"
+                        auto-scale
+                    ></a-video>
+                {% else %}
+                    <a-image
+                        src="{{ url_for('static', filename='uploads/' + media_file) }}"
+                        position="0 0.1 0"
+                        rotation="-90 0 0"
+                        width="1"
+                        height="1"
+                        auto-scale
+                    ></a-image>
+                {% endif %}
+            {% else %}
+                <a-box position="0 0 0" rotation="0 45 45" scale="0.5 0.5 0.5" color="#4CC3D9"></a-box>
+            {% endif %}
+
+            <!-- Realistic fireworks - More positions -->
+            <a-entity position="-1 0 -1" firework></a-entity>
+            <a-entity position="1 0 1" firework></a-entity>
+            <a-entity position="-1 0 1" firework></a-entity>
+            <a-entity position="1 0 -1" firework></a-entity>
+        </a-marker>
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
+</html> 
